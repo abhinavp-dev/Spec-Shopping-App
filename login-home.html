@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ShopLite — Static Prototype (Stage 1: Login + Home)</title>
+<style>
+  :root {
+    --color-primary: #1D9E75;
+    --color-primary-dark: #5DCAA5;
+    --color-primary-text-on: #04342C;
+    --color-bg-light: #FFFFFF;
+    --color-bg-dark: #1C1C1E;
+    --color-surface-light: #F5F5F7;
+    --color-surface-dark: #2C2C2E;
+    --color-text-primary-light: #111111;
+    --color-text-primary-dark: #F5F5F7;
+    --color-text-secondary-light: #6E6E73;
+    --color-text-secondary-dark: #9B9B9F;
+    --color-error: #D93025;
+    --color-border-light: #E5E5E5;
+    --color-border-dark: #3A3A3C;
+    --radius-default: 12px;
+    --radius-button: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    background: #e9e9ec;
+    margin: 0;
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .meta-bar {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .meta-bar h1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+  }
+
+  .meta-bar p {
+    font-size: 12px;
+    color: #777;
+    margin: 2px 0 0;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  .controls button {
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .controls button.active {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+  }
+
+  .phone {
+    width: 320px;
+    height: 640px;
+    background: #000;
+    border-radius: 44px;
+    padding: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    flex-shrink: 0;
+  }
+
+  .screen {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.2s ease;
+  }
+
+  body.light .screen { --bg: var(--color-bg-light); --surface: var(--color-surface-light); --text-primary: var(--color-text-primary-light); --text-secondary: var(--color-text-secondary-light); --border-color: var(--color-border-light); }
+  body.dark .screen { --bg: var(--color-bg-dark); --surface: var(--color-surface-dark); --text-primary: var(--color-text-primary-dark); --text-secondary: var(--color-text-secondary-dark); --border-color: var(--color-border-dark); }
+
+  .status-bar {
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Login screen ---------- */
+  .login-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 24px;
+    gap: 16px;
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .login-logo .icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--color-primary);
+    opacity: 0.15;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  body.dark .login-logo .icon { opacity: 0.25; }
+
+  .login-logo .title {
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .field-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .field-input {
+    width: 100%;
+    height: 40px;
+    border-radius: var(--radius-default);
+    background: var(--surface);
+    border: 1px solid transparent;
+    padding: 0 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+  }
+
+  .field-input:focus {
+    border-color: var(--color-primary);
+  }
+
+  .field-input.invalid {
+    border-color: var(--color-error);
+  }
+
+  .password-wrap {
+    position: relative;
+  }
+
+  .password-wrap .toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    background: none;
+    border: none;
+  }
+
+  .error-banner {
+    display: none;
+    background: rgba(217, 48, 37, 0.1);
+    color: var(--color-error);
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+  .error-banner.show { display: block; }
+
+  .primary-btn {
+    height: 42px;
+    border-radius: var(--radius-button);
+    background: var(--color-primary);
+    color: var(--color-primary-text-on);
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s;
+  }
+
+  .primary-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .hint {
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: var(--color-primary-text-on);
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .primary-btn.loading .spinner { display: inline-block; }
+  .primary-btn.loading .btn-label { display: none; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Home screen ---------- */
+  .home-view {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .home-view.active { display: flex; }
+  .login-view.hidden { display: none; }
+
+  .home-nav {
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .home-nav .title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .home-nav .logout-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .home-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .refresh-hint {
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-secondary);
+    padding: 6px 0;
+  }
+
+  .product-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--surface);
+    border-radius: var(--radius-default);
+    padding: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .product-row:active { transform: scale(0.98); }
+
+  .product-thumb {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--border-color);
+  }
+
+  .product-info { flex: 1; min-width: 0; }
+
+  .product-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 3px;
+  }
+
+  .product-price {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .product-rating {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+  }
+
+  .center-state {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+  }
+  .center-state.show { display: flex; }
+
+  .center-state .state-icon {
+    font-size: 26px;
+    opacity: 0.5;
+  }
+
+  .center-state p {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .retry-btn {
+    margin-top: 4px;
+    font-size: 12px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: var(--color-primary-text-on);
+    border: none;
+    cursor: pointer;
+  }
+
+  .big-spinner {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2.5px solid var(--border-color);
+    border-top-color: var(--color-primary);
+    animation: spin 0.7s linear infinite;
+  }
+
+  .pagination-spinner {
+    display: none;
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .pagination-spinner.show { display: flex; }
+
+  .pagination-error {
+    display: none;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--color-error);
+    padding: 8px 0;
+  }
+  .pagination-error.show { display: block; }
+  .pagination-error span { text-decoration: underline; cursor: pointer; }
+
+  .detail-stub {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    flex-direction: column;
+    z-index: 5;
+  }
+  .detail-stub.show { display: flex; }
+
+  .detail-nav {
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .detail-nav button {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .detail-nav .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .detail-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .detail-body .badge {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    background: var(--surface);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .log-panel {
+    width: 320px;
+    max-width: 100%;
+    font-size: 11px;
+    color: #555;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    max-height: 120px;
+    overflow-y: auto;
+    font-family: ui-monospace, monospace;
+  }
+  .log-panel .row { padding: 2px 0; }
+</style>
+</head>
+<body class="light">
+
+<div class="meta-bar">
+  <div>
+    <h1>ShopLite — Static Prototype (Stage 1)</h1>
+    <p>Login → Home. Live data from dummyjson.com. For UX/UI validation only — not the real app.</p>
+  </div>
+  <div class="controls">
+    <button id="theme-light" class="active" onclick="setTheme('light')">Light</button>
+    <button id="theme-dark" onclick="setTheme('dark')">Dark</button>
+    <button onclick="simulateNetworkError()">Simulate error</button>
+    <button onclick="resetProto()">Reset</button>
+  </div>
+</div>
+
+<div class="phone">
+  <div class="screen">
+    <div class="status-bar"></div>
+
+    <!-- LOGIN -->
+    <div class="login-view" id="login-view">
+      <div class="login-logo">
+        <div class="icon">🛍️</div>
+        <div class="title">ShopLite</div>
+      </div>
+
+      <div class="error-banner" id="login-error"></div>
+
+      <div>
+        <label class="field-label">Username</label>
+        <input class="field-input" id="username" type="text" placeholder="emilys" autocomplete="off" oninput="validateForm()" onkeydown="if(event.key==='Enter'){document.getElementById('password').focus()}" />
+      </div>
+
+      <div>
+        <label class="field-label">Password</label>
+        <div class="password-wrap">
+          <input class="field-input" id="password" type="password" placeholder="••••••••" oninput="validateForm()" onkeydown="if(event.key==='Enter'){attemptLogin()}" />
+          <button class="toggle" onclick="togglePassword()" id="pw-toggle" aria-label="Show password">Show</button>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="login-btn" disabled onclick="attemptLogin()">
+        <span class="btn-label">Log in</span>
+        <span class="spinner"></span>
+      </button>
+
+      <div class="hint">Try: emilys / emilyspass — or anything else to see the error state</div>
+    </div>
+
+    <!-- HOME -->
+    <div class="home-view" id="home-view">
+      <div class="home-nav">
+        <div class="title">Products</div>
+        <button class="logout-btn" onclick="logout()" aria-label="Log out">⏻</button>
+      </div>
+
+      <div class="home-list" id="home-list" onscroll="handleScroll()">
+        <div class="refresh-hint">Pull to refresh (or click below)</div>
+        <div style="text-align:center; margin-bottom:8px;">
+          <button onclick="refreshProducts()" style="font-size:11px; padding:5px 10px; border-radius:8px; border:1px solid var(--border-color); background:var(--surface); color:var(--text-primary); cursor:pointer;">↻ Refresh</button>
+        </div>
+
+        <div id="product-rows"></div>
+
+        <div class="pagination-spinner" id="pagination-spinner">
+          <div class="big-spinner" style="width:16px;height:16px;"></div>
+        </div>
+        <div class="pagination-error" id="pagination-error">
+          Couldn't load more — <span onclick="loadMoreProducts()">Retry</span>
+        </div>
+      </div>
+
+      <div class="center-state" id="home-loading">
+        <div class="big-spinner"></div>
+      </div>
+      <div class="center-state" id="home-error">
+        <div class="state-icon">⚠️</div>
+        <p>Couldn't load products.<br/>Check your connection and try again.</p>
+        <button class="retry-btn" onclick="fetchInitialProducts()">Retry</button>
+      </div>
+      <div class="center-state" id="home-empty">
+        <div class="state-icon">📦</div>
+        <p>No products found.</p>
+      </div>
+
+      <!-- Detail stub -->
+      <div class="detail-stub" id="detail-stub">
+        <div class="detail-nav">
+          <button onclick="closeDetail()">← Back</button>
+          <div class="title">Product detail</div>
+        </div>
+        <div class="detail-body">
+          <div class="badge">Stage 2 — not yet implemented</div>
+          <p style="font-size:12.5px; color:var(--text-secondary); margin:0;" id="detail-product-name"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="log-panel" id="log-panel">
+  <div class="row">Interaction log will appear here…</div>
+</div>
+
+<script>
+let products = [];
+let skip = 0;
+const limit = 10;
+let total = 0;
+let isLoadingMore = false;
+let forceErrorOnce = false;
+
+function log(msg) {
+  const panel = document.getElementById('log-panel');
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.textContent = '› ' + msg;
+  panel.appendChild(row);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function setTheme(mode) {
+  document.body.className = mode;
+  document.getElementById('theme-light').classList.toggle('active', mode === 'light');
+  document.getElementById('theme-dark').classList.toggle('active', mode === 'dark');
+  log('Theme switched to ' + mode);
+}
+
+function togglePassword() {
+  const pw = document.getElementById('password');
+  const btn = document.getElementById('pw-toggle');
+  if (pw.type === 'password') { pw.type = 'text'; btn.textContent = 'Hide'; }
+  else { pw.type = 'password'; btn.textContent = 'Show'; }
+}
+
+function validateForm() {
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value.trim();
+  document.getElementById('login-btn').disabled = !(u && p);
+}
+
+function simulateNetworkError() {
+  forceErrorOnce = true;
+  log('Next action will simulate a network error');
+}
+
+async function attemptLogin() {
+  const btn = document.getElementById('login-btn');
+  if (btn.disabled) return;
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const errorBanner = document.getElementById('login-error');
+  errorBanner.classList.remove('show');
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  log('Login attempt: ' + username);
+
+  try {
+    if (forceErrorOnce) {
+      forceErrorOnce = false;
+      throw new Error('network');
+    }
+    const res = await fetch('https://dummyjson.com/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, expiresInMins: 30 })
+    });
+
+    if (!res.ok) {
+      errorBanner.textContent = 'Invalid username or password.';
+      errorBanner.classList.add('show');
+      document.getElementById('password').value = '';
+      log('Login failed: invalid credentials');
+      return;
+    }
+
+    const data = await res.json();
+    log('Login success — token received for ' + data.username);
+    showHome();
+  } catch (e) {
+    errorBanner.textContent = 'Something went wrong. Please try again.';
+    errorBanner.classList.add('show');
+    log('Login failed: network error');
+  } finally {
+    btn.classList.remove('loading');
+    validateForm();
+  }
+}
+
+function showHome() {
+  document.getElementById('login-view').classList.add('hidden');
+  document.getElementById('home-view').classList.add('active');
+  fetchInitialProducts();
+}
+
+function logout() {
+  log('Logout tapped — clearing session');
+  document.getElementById('home-view').classList.remove('active');
+  document.getElementById('login-view').classList.remove('hidden');
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  validateForm();
+}
+
+function setHomeState(state) {
+  document.getElementById('home-loading').classList.toggle('show', state === 'loading');
+  document.getElementById('home-error').classList.toggle('show', state === 'error');
+  document.getElementById('home-empty').classList.toggle('show', state === 'empty');
+  document.getElementById('home-list').style.display = state === 'content' ? 'block' : 'none';
+}
+
+async function fetchInitialProducts() {
+  skip = 0;
+  products = [];
+  setHomeState('loading');
+  log('Fetching initial products…');
+  try {
+    if (forceErrorOnce) { forceErrorOnce = false; throw new Error('network'); }
+    const res = await fetch(`https://dummyjson.com/products?limit=${limit}&skip=0`);
+    if (!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    products = data.products;
+    total = data.total;
+    skip = limit;
+    if (products.length === 0) { setHomeState('empty'); return; }
+    setHomeState('content');
+    renderProducts();
+    log(`Loaded ${products.length} products (total ${total})`);
+  } catch (e) {
+    setHomeState('error');
+    log('Initial product fetch failed');
+  }
+}
+
+async function refreshProducts() {
+  log('Pull-to-refresh triggered');
+  await fetchInitialProducts();
+}
+
+function renderProducts() {
+  const container = document.getElementById('product-rows');
+  container.innerHTML = '';
+  products.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'product-row';
+    row.onclick = () => openDetail(p);
+    row.innerHTML = `
+      <img class="product-thumb" src="${p.thumbnail}" alt="" loading="lazy" />
+      <div class="product-info">
+        <div class="product-title">${p.title}</div>
+        <div class="product-meta">
+          <span class="product-price">$${p.price}</span>
+          <span class="product-rating">★ ${p.rating}</span>
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+async function loadMoreProducts() {
+  if (isLoadingMore || skip >= total) return;
+  isLoadingMore = true;
+  document.getElementById('pagination-error').classList.remove('show');
+  document.getElementById('pagination-spinner').classList.add('show');
+  log('Loading more products (skip=' + skip + ')…');
+  try {
+    if (forceErrorOnce) { forceErrorOnce = false; throw new Error('network'); }
+    const res = await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`);
+    if (!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    const existingIds = new Set(products.map(p => p.id));
+    const newOnes = data.products.filter(p => !existingIds.has(p.id));
+    products = products.concat(newOnes);
+    skip += limit;
+    renderProducts();
+    log(`Appended ${newOnes.length} products (skip now ${skip})`);
+  } catch (e) {
+    document.getElementById('pagination-error').classList.add('show');
+    log('Pagination fetch failed — list preserved');
+  } finally {
+    isLoadingMore = false;
+    document.getElementById('pagination-spinner').classList.remove('show');
+  }
+}
+
+function handleScroll() {
+  const list = document.getElementById('home-list');
+  const nearBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 60;
+  if (nearBottom) loadMoreProducts();
+}
+
+function openDetail(product) {
+  document.getElementById('detail-product-name').textContent = '"' + product.title + '" tapped — this is where the Detail screen will render.';
+  document.getElementById('detail-stub').classList.add('show');
+  log('Tapped product: ' + product.title + ' (Detail is stubbed, Stage 2)');
+}
+
+function closeDetail() {
+  document.getElementById('detail-stub').classList.remove('show');
+}
+
+function resetProto() {
+  logout();
+  document.getElementById('log-panel').innerHTML = '<div class="row">Interaction log will appear here…</div>';
+}
+</script>
+
+</body>
+</html>
