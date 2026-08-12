@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopLite Prototype — Stage 1 (Login + Home)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Design Tokens per 04-DESIGN-DOCUMENT.md */
+      --color-primary: #1D9E75;
+      --color-primary-hover: #168562;
+      --color-background: #FFFFFF;
+      --color-surface: #F5F5F7;
+      --color-surface-hover: #EBEBEF;
+      --color-text-primary: #111111;
+      --color-text-secondary: #6E6E73;
+      --color-error: #D93025;
+      --color-error-bg: #FCE8E6;
+      --color-success: #188038;
+      --color-border: #E5E5EA;
+
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      --radius-default: 12px;
+      --radius-button: 10px;
+      --radius-card: 12px;
+
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --color-background: #000000;
+      --color-surface: #1C1C1E;
+      --color-surface-hover: #2C2C2E;
+      --color-text-primary: #FFFFFF;
+      --color-text-secondary: #8E8E93;
+      --color-border: #38383A;
+      --color-error-bg: #3C1E1E;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: #EFEFF4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--color-text-primary);
+    }
+
+    /* Top Control Bar for Prototype Controls */
+    .proto-controls {
+      background: #ffffff;
+      padding: 12px 20px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .proto-controls label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .proto-btn {
+      background: #F2F2F7;
+      border: 1px solid #D1D1D6;
+      color: #1C1C1E;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .proto-btn:hover {
+      background: #E5E5EA;
+    }
+
+    .proto-btn.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    /* iOS Device Frame Container */
+    .device-container {
+      width: 390px;
+      height: 844px;
+      background-color: var(--color-background);
+      border-radius: 48px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.25), 0 0 0 12px #1C1C1E;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+
+    .device-container.fullscreen {
+      width: 100%;
+      max-width: 480px;
+      height: 90vh;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+
+    /* Status Bar */
+    .status-bar {
+      height: 47px;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      z-index: 10;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .status-bar .notch {
+      width: 120px;
+      height: 30px;
+      background: #1C1C1E;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Screen Views */
+    .screen-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen-view.active {
+      display: flex;
+    }
+
+    /* Header Nav Bar */
+    .nav-bar {
+      height: 54px;
+      padding: 0 var(--spacing-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+      background: var(--color-background);
+    }
+
+    .nav-bar h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-primary);
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn.icon-only {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-error);
+      padding: 0;
+    }
+
+    .icon-btn:hover {
+      background: var(--color-surface-hover);
+      transform: scale(1.05);
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* LOGIN SCREEN STYLES */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100%;
+      padding: 0 var(--spacing-md);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .brand-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--color-primary), #107052);
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 36px;
+      margin-bottom: var(--spacing-md);
+      box-shadow: 0 8px 20px rgba(29, 158, 117, 0.3);
+    }
+
+    .login-header h2 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .login-header p {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-default);
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--color-primary);
+      background: var(--color-background);
+      box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+    }
+
+    .toggle-pwd {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Error Banner */
+    .error-banner {
+      background: var(--color-error-bg);
+      border: 1px solid rgba(217, 48, 37, 0.3);
+      color: var(--color-error);
+      padding: 12px var(--spacing-md);
+      border-radius: var(--radius-default);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: var(--spacing-md);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .error-banner.show {
+      display: flex;
+    }
+
+    /* Primary Button */
+    .btn-primary {
+      width: 100%;
+      height: 50px;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-button);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      margin-top: var(--spacing-sm);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .quick-fill-box {
+      margin-top: var(--spacing-lg);
+      padding: var(--spacing-md);
+      background: var(--color-surface);
+      border-radius: var(--radius-default);
+      text-align: center;
+    }
+
+    .quick-fill-box p {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* HOME SCREEN STYLES */
+    .product-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .product-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-card);
+      padding: 12px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+      border: 1px solid transparent;
+    }
+
+    .product-card:hover {
+      background: var(--color-surface-hover);
+      transform: translateY(-1px);
+    }
+
+    .product-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #E5E5EA;
+      flex-shrink: 0;
+    }
+
+    .product-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .product-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .product-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .product-rating {
+      font-size: 13px;
+      font-weight: 600;
+      color: #F5A623;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* Loading / Error / Empty States */
+    .state-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-xl) var(--spacing-md);
+      text-align: center;
+      flex: 1;
+    }
+
+    .state-icon {
+      font-size: 48px;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-text-secondary);
+    }
+
+    .state-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .state-sub {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-md);
+      max-width: 260px;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .spinner.dark {
+      border: 3px solid rgba(29, 158, 117, 0.2);
+      border-top-color: var(--color-primary);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Bottom Home Bar */
+    .home-indicator {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .home-indicator::after {
+      content: '';
+      width: 134px;
+      height: 5px;
+      background: var(--color-text-primary);
+      opacity: 0.2;
+      border-radius: 3px;
+    }
+
+    /* Stage 2 Detail Stub Modal */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: flex-end;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-sheet {
+      background: var(--color-background);
+      width: 100%;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: var(--spacing-lg);
+      max-height: 80%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+    }
+
+    .stub-badge {
+      align-self: flex-start;
+      background: #E8F5E9;
+      color: var(--color-primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* Pull to Refresh Indicator */
+    .ptr-bar {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      gap: 6px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PROTOTYPE SIMULATION CONTROLS -->
+  <div class="proto-controls">
+    <label>Prototype Controls:</label>
+    <button class="proto-btn" id="btn-toggle-theme">🌗 Toggle Theme</button>
+    <button class="proto-btn" id="btn-toggle-frame">📱 Toggle Frame Size</button>
+    <button class="proto-btn" id="btn-sim-loading">⏳ Sim Loading State</button>
+    <button class="proto-btn" id="btn-sim-error">⚠️ Sim Initial Error</button>
+    <button class="proto-btn" id="btn-sim-empty">📭 Sim Empty State</button>
+    <button class="proto-btn" id="btn-reset">🔄 Reset Data</button>
+  </div>
+
+  <!-- DEVICE FRAME -->
+  <div class="device-container" id="device">
+    
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <span id="clock">9:41</span>
+      <div class="notch"></div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span>📶</span><span>⚡</span>
+      </div>
+    </div>
+
+    <!-- 1. LOGIN SCREEN -->
+    <div class="screen-view active" id="screen-login">
+      <div class="content-area">
+        <div class="login-container">
+          <div class="login-header">
+            <div class="brand-icon">🛍️</div>
+            <h2>ShopLite</h2>
+            <p>Sign in to your e-commerce account</p>
+          </div>
+
+          <div class="error-banner" id="login-error">
+            <span>⚠️</span> <span id="login-error-msg">Invalid username or password.</span>
+          </div>
+
+          <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" class="form-input" placeholder="e.g. emilys" autocomplete="off" oninput="validateLoginForm(true)">
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrapper">
+                <input type="password" id="password" class="form-input" placeholder="Enter password" oninput="validateLoginForm(true)">
+                <button type="button" class="toggle-pwd" onclick="togglePasswordVisibility()">Show</button>
+              </div>
+            </div>
+
+            <button type="submit" id="btn-login" class="btn-primary" disabled>
+              <span id="btn-login-text">Log In</span>
+              <div class="spinner" id="btn-login-spinner" style="display:none;"></div>
+            </button>
+          </form>
+
+          <div class="quick-fill-box">
+            <p><strong>Stage 1 Test Credentials (DummyJSON):</strong></p>
+            <button class="proto-btn" style="width:100%; margin-bottom:6px;" onclick="fillTestCredentials('emilys', 'emilyspass')">
+              Use `emilys` / `emilyspass` (Valid)
+            </button>
+            <button class="proto-btn" style="width:100%;" onclick="fillTestCredentials('wronguser', 'wrongpass')">
+              Use Invalid Credentials (401 Error Test)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. HOME SCREEN (PRODUCTS) -->
+    <div class="screen-view" id="screen-home">
+      <!-- Nav Bar -->
+      <div class="nav-bar">
+        <h1>Products</h1>
+        <button class="icon-btn icon-only" onclick="handleLogout()" title="Log Out" aria-label="Log Out">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Pull to Refresh Header -->
+      <div class="ptr-bar" id="ptr-bar" style="display:none;">
+        <div class="spinner dark" style="width:16px; height:16px;"></div>
+        <span>Refreshing product catalog...</span>
+      </div>
+
+      <!-- Content Area / Product Feed -->
+      <div class="content-area" id="home-content-area" onscroll="handleInfiniteScroll(this)">
+        
+        <!-- INITIAL LOADING STATE VIEW -->
+        <div class="state-view" id="state-loading" style="display:none;">
+          <div class="spinner dark" style="width:36px; height:36px; margin-bottom:16px;"></div>
+          <div class="state-title">Loading Products</div>
+          <div class="state-sub">Fetching latest catalog items...</div>
+        </div>
+
+        <!-- INITIAL ERROR STATE VIEW -->
+        <div class="state-view" id="state-error" style="display:none;">
+          <div class="state-icon">⚠️</div>
+          <div class="state-title">Couldn't Load Products</div>
+          <div class="state-sub">Please check your connection and try again.</div>
+          <button class="proto-btn" style="background:var(--color-primary); color:white; padding:10px 20px;" onclick="fetchProducts(true)">Retry Request</button>
+        </div>
+
+        <!-- EMPTY STATE VIEW -->
+        <div class="state-view" id="state-empty" style="display:none;">
+          <div class="state-icon">📭</div>
+          <div class="state-title">No Products Found</div>
+          <div class="state-sub">The product catalog is currently empty.</div>
+        </div>
+
+        <!-- PRODUCT LIST -->
+        <div class="product-list" id="product-list"></div>
+
+        <!-- BOTTOM PAGINATION LOADING SPINNER -->
+        <div id="pagination-spinner" style="display:none; text-align:center; padding:16px;">
+          <div class="spinner dark" style="display:inline-block; width:20px; height:20px;"></div>
+          <p style="font-size:12px; color:var(--color-text-secondary); margin-top:6px;">Loading more items...</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STAGE 2 DETAIL STUB MODAL -->
+    <div class="modal-overlay" id="detail-modal" onclick="closeDetailModal(event)">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="stub-badge">Stage 2 Detail Route Stub</div>
+        <img id="stub-img" src="" style="width:100%; height:180px; object-fit:cover; border-radius:12px; background:#eee;">
+        <h2 id="stub-title" style="font-size:20px; font-weight:700; color:var(--color-text-primary);"></h2>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="stub-price" style="font-size:22px; font-weight:800; color:var(--color-primary);"></span>
+          <span id="stub-rating" style="font-size:14px; font-weight:600; color:#F5A623;"></span>
+        </div>
+        <p id="stub-desc" style="font-size:14px; color:var(--color-text-secondary); line-height:1.4;"></p>
+        <p style="font-size:12px; color:#888; border-top:1px solid var(--color-border); padding-top:10px;">
+          ℹ️ FR-2.9 Navigation target verified — Detail view full implementation will occur in Stage 2.
+        </p>
+        <button class="proto-btn" style="background:var(--color-primary); color:white; padding:12px;" onclick="closeDetailModal()">Close Preview</button>
+      </div>
+    </div>
+
+    <!-- HOME INDICATOR BAR -->
+    <div class="home-indicator"></div>
+  </div>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    let products = [];
+    let skip = 0;
+    const limit = 10;
+    let totalProducts = 0;
+    let isLoading = false;
+    let hasMore = true;
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      updateClock();
+      setInterval(updateClock, 10000);
+      checkStoredSession();
+    });
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const mins = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${mins}`;
+    }
+
+    // --- THEME & FRAME TOGGLES ---
+    document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+      const device = document.getElementById('device');
+      const current = device.getAttribute('data-theme');
+      if (current === 'dark') {
+        device.removeAttribute('data-theme');
+      } else {
+        device.setAttribute('data-theme', 'dark');
+      }
+    });
+
+    document.getElementById('btn-toggle-frame').addEventListener('click', () => {
+      document.getElementById('device').classList.toggle('fullscreen');
+    });
+
+    // --- LOGIN LOGIC ---
+    function validateLoginForm(clearError = false) {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      const btn = document.getElementById('btn-login');
+      btn.disabled = !(u.length > 0 && p.length > 0);
+      if (clearError) {
+        document.getElementById('login-error').classList.remove('show');
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('password');
+      const btn = event.target;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Show';
+      }
+    }
+
+    function fillTestCredentials(username, password) {
+      document.getElementById('username').value = username;
+      document.getElementById('password').value = password;
+      validateLoginForm(true);
+    }
+
+    async function handleLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const btn = document.getElementById('btn-login');
+      const btnText = document.getElementById('btn-login-text');
+      const spinner = document.getElementById('btn-login-spinner');
+      const errorBanner = document.getElementById('login-error');
+      const errorMsg = document.getElementById('login-error-msg');
+
+      if (!username || !password) return;
+
+      // In-flight state
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      spinner.style.display = 'block';
+      errorBanner.classList.remove('show');
+
+      try {
+        const response = await fetch('https://dummyjson.com/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, expiresInMins: 60 })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.accessToken) {
+          // Success: persist session
+          localStorage.setItem('shoplite_token', data.accessToken);
+          localStorage.setItem('shoplite_user', JSON.stringify({
+            username: data.username,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email
+          }));
+
+          // Clear password field
+          document.getElementById('password').value = '';
+
+          // Transition to Home
+          showScreen('screen-home');
+          fetchProducts(true);
+        } else {
+          // Failure (e.g. 401)
+          errorMsg.textContent = data.message || 'Invalid username or password.';
+          errorBanner.classList.add('show');
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Network error. Please check connection and try again.';
+        errorBanner.classList.add('show');
+      } finally {
+        btn.disabled = false;
+        btnText.style.display = 'inline';
+        spinner.style.display = 'none';
+        validateLoginForm(false);
+      }
+    }
+
+    function checkStoredSession() {
+      const token = localStorage.getItem('shoplite_token');
+      if (token) {
+        showScreen('screen-home');
+        fetchProducts(true);
+      } else {
+        showScreen('screen-login');
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('shoplite_token');
+      localStorage.removeItem('shoplite_user');
+      products = [];
+      skip = 0;
+      showScreen('screen-login');
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // --- HOME & PRODUCT FETCHING LOGIC ---
+    async function fetchProducts(isInitial = false) {
+      if (isLoading) return;
+      isLoading = true;
+
+      const stateLoading = document.getElementById('state-loading');
+      const stateError = document.getElementById('state-error');
+      const stateEmpty = document.getElementById('state-empty');
+      const productList = document.getElementById('product-list');
+      const paginationSpinner = document.getElementById('pagination-spinner');
+
+      if (isInitial) {
+        skip = 0;
+        products = [];
+        productList.innerHTML = '';
+        stateLoading.style.display = 'flex';
+        stateError.style.display = 'none';
+        stateEmpty.style.display = 'none';
+      } else {
+        paginationSpinner.style.display = 'block';
+      }
+
+      try {
+        const response = await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`);
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        
+        const data = await response.json();
+        totalProducts = data.total;
+        
+        if (isInitial && data.products.length === 0) {
+          stateLoading.style.display = 'none';
+          stateEmpty.style.display = 'flex';
+          return;
+        }
+
+        products = isInitial ? data.products : [...products, ...data.products];
+        skip += limit;
+        hasMore = skip < totalProducts;
+
+        renderProductList(data.products, isInitial);
+        stateLoading.style.display = 'none';
+      } catch (err) {
+        if (isInitial) {
+          stateLoading.style.display = 'none';
+          stateError.style.display = 'flex';
+        } else {
+          console.error("Pagination error:", err);
+        }
+      } finally {
+        isLoading = false;
+        paginationSpinner.style.display = 'none';
+      }
+    }
+
+    function renderProductList(newProducts, isInitial) {
+      const container = document.getElementById('product-list');
+      if (isInitial) container.innerHTML = '';
+
+      newProducts.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => openDetailModal(p);
+        card.innerHTML = `
+          <img class="product-img" src="${p.thumbnail}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+          <div class="product-info">
+            <div class="product-title">${p.title}</div>
+            <div style="font-size:12px; color:var(--color-text-secondary);">${p.brand || p.category}</div>
+            <div class="product-meta">
+              <div class="product-price">$${p.price.toFixed(2)}</div>
+              <div class="product-rating">★ ${p.rating.toFixed(2)}</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function handleInfiniteScroll(area) {
+      if (isLoading || !hasMore) return;
+      if (area.scrollTop + area.clientHeight >= area.scrollHeight - 100) {
+        fetchProducts(false);
+      }
+    }
+
+    // --- STAGE 2 STUB MODAL ---
+    function openDetailModal(product) {
+      document.getElementById('stub-img').src = product.thumbnail;
+      document.getElementById('stub-title').textContent = product.title;
+      document.getElementById('stub-price').textContent = `$${product.price.toFixed(2)}`;
+      document.getElementById('stub-rating').textContent = `★ ${product.rating.toFixed(2)}`;
+      document.getElementById('stub-desc').textContent = product.description;
+      document.getElementById('detail-modal').classList.add('active');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detail-modal').classList.remove('active');
+    }
+
+    // --- SIMULATION CONTROLS FOR PROTOTYPE REVIEWS ---
+    document.getElementById('btn-sim-loading').addEventListener('click', () => {
+      if (!document.getElementById('screen-home').classList.contains('active')) return;
+      document.getElementById('product-list').innerHTML = '';
+      document.getElementById('state-error').style.display = 'none';
+      document.getElementById('state-empty').style.display = 'none';
+      document.getElementById('state-loading').style.display = 'flex';
+    });
+
+    document.getElementById('btn-sim-error').addEventListener('click', () => {
+      if (!document.getElementById('screen-home').classList.contains('active')) return;
+      document.getElementById('product-list').innerHTML = '';
+      document.getElementById('state-loading').style.display = 'none';
+      document.getElementById('state-empty').style.display = 'none';
+      document.getElementById('state-error').style.display = 'flex';
+    });
+
+    document.getElementById('btn-sim-empty').addEventListener('click', () => {
+      if (!document.getElementById('screen-home').classList.contains('active')) return;
+      document.getElementById('product-list').innerHTML = '';
+      document.getElementById('state-loading').style.display = 'none';
+      document.getElementById('state-error').style.display = 'none';
+      document.getElementById('state-empty').style.display = 'flex';
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      if (document.getElementById('screen-home').classList.contains('active')) {
+        fetchProducts(true);
+      }
+    });
+  </script>
+</body>
+</html>
