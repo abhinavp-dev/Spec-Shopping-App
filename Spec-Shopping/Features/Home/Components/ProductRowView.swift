@@ -34,14 +34,14 @@ struct ProductRowView: View {
                     Text(product.formattedPrice)
                         .font(.callout)
                         .bold()
-                        .foregroundStyle(Color(hex: "1D9E75"))
+                        .foregroundStyle(Color.appPrimary)
 
                     Spacer()
 
                     HStack(spacing: 3) {
                         Image(systemName: "star.fill")
                             .font(.caption2)
-                            .foregroundStyle(Color(hex: "F5A623"))
+                            .foregroundStyle(Color.appWarning)
                             .accessibilityHidden(true)
 
                         Text(String(format: "%.2f", product.rating))

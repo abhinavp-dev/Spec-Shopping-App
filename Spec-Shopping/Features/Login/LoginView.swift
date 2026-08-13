@@ -40,13 +40,13 @@ struct LoginView: View {
                 RoundedRectangle(cornerRadius: 20)
                     .fill(
                         LinearGradient(
-                            colors: [Color(hex: "1D9E75"), Color(hex: "107052")],
+                            colors: [.appPrimary, .appPrimaryDark],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 72, height: 72)
-                    .shadow(color: Color(hex: "1D9E75").opacity(0.3), radius: 10, x: 0, y: 6)
+                    .shadow(color: Color.appPrimary.opacity(0.3), radius: 10, x: 0, y: 6)
 
                 Image(systemName: "bag.fill")
                     .font(.system(size: 34))
@@ -71,22 +71,22 @@ struct LoginView: View {
     private func errorBannerView(errorMessage: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(Color(hex: "D93025"))
+                .foregroundStyle(Color.appError)
 
             Text(errorMessage)
                 .font(.footnote)
                 .bold()
-                .foregroundStyle(Color(hex: "D93025"))
+                .foregroundStyle(Color.appError)
                 .multilineTextAlignment(.leading)
 
             Spacer()
         }
         .padding(12)
-        .background(Color(hex: "D93025").opacity(0.12))
+        .background(Color.appError.opacity(0.12))
         .clipShape(.rect(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(hex: "D93025").opacity(0.3), lineWidth: 1)
+                .stroke(Color.appError.opacity(0.3), lineWidth: 1)
         )
     }
 
@@ -146,7 +146,7 @@ struct LoginView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
-                .background(Color(hex: "1D9E75"))
+                .background(Color.appPrimary)
                 .foregroundStyle(.white)
                 .clipShape(.rect(cornerRadius: 10))
                 .opacity(viewModel.isLoginButtonDisabled ? 0.5 : 1.0)
@@ -173,7 +173,7 @@ struct LoginView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
                     .background(Color(.tertiarySystemBackground))
-                    .foregroundStyle(Color(hex: "1D9E75"))
+                    .foregroundStyle(Color.appPrimary)
                     .clipShape(.rect(cornerRadius: 8))
             }
 
@@ -204,30 +204,7 @@ struct LoginView: View {
     }
 }
 
-// MARK: - Color Hex Helper
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (255, 0, 0, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue:  Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-}
+
 
 #Preview {
     LoginView(onLoginSuccess: {})

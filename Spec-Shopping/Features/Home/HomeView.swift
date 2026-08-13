@@ -53,7 +53,7 @@ struct HomeView: View {
         }
         .labelStyle(.iconOnly)
         .font(.body.weight(.semibold))
-        .foregroundStyle(Color(hex: "D93025"))
+        .foregroundStyle(Color.appError)
         .accessibilityLabel("Log Out")
     }
 
@@ -107,8 +107,8 @@ struct HomeView: View {
                 .bold()
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
-                .background(Color(hex: "1D9E75").opacity(0.15))
-                .foregroundStyle(Color(hex: "1D9E75"))
+                .background(Color.appPrimary.opacity(0.15))
+                .foregroundStyle(Color.appPrimary)
                 .clipShape(.rect(cornerRadius: 6))
 
             AsyncImage(url: URL(string: product.thumbnail)) { phase in
@@ -134,13 +134,13 @@ struct HomeView: View {
                 Text(product.formattedPrice)
                     .font(.title2)
                     .bold()
-                    .foregroundStyle(Color(hex: "1D9E75"))
+                    .foregroundStyle(Color.appPrimary)
 
                 Spacer()
 
                 HStack(spacing: 4) {
                     Image(systemName: "star.fill")
-                        .foregroundStyle(Color(hex: "F5A623"))
+                        .foregroundStyle(Color.appWarning)
                     Text(String(format: "%.2f", product.rating))
                         .bold()
                 }
@@ -169,7 +169,7 @@ struct HomeView: View {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
-            .background(Color(hex: "1D9E75"))
+            .background(Color.appPrimary)
             .clipShape(.rect(cornerRadius: 10))
             .padding(.horizontal)
             .padding(.bottom, 16)
