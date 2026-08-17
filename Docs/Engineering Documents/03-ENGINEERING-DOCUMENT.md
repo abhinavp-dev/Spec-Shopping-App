@@ -51,12 +51,14 @@ If a future need arises (e.g. image caching at scale, analytics), it will be add
 | Endpoint | Method | Used By | Purpose |
 |---|---|---|---|
 | `/auth/login` | POST | `AuthService` | Exchange username/password for access/refresh tokens |
-| `/products` | GET | `ProductService` | Fetch paginated product list (`limit`, `skip` query params) |
+| `/products` | GET | `ProductService` | Fetch paginated product list (`limit`, `skip` query params) — Stage 1 |
+| `/products/{id}` | GET | `ProductService` | Fetch single product by ID — Stage 2 |
 
 **Integration pattern:**
 - `APIClient` centralizes request construction, header injection (`Authorization: Bearer <token>` when a session exists), `Codable` decoding, and error mapping.
 - Each Service method returns a strongly-typed model or throws a typed `APIError` (`.unauthorized`, `.network`, `.decoding`, `.server(statusCode:)`, etc.) — ViewModels switch on this to decide what UI state to show (per Task Document's error/empty/retry requirements).
 - Requests use `async/await`; no manual callback/completion-handler chains.
+- **Stage 2 additions:** `ProductService.fetchProduct(id:)` added for Detail screen; image URLs loaded via SwiftUI `AsyncImage`, placeholder shown on failure.
 
 ---
 
@@ -81,4 +83,4 @@ Per the mandatory SDD process, each feature's implementation step follows:
 
 ## Changelog
 - **Stage 1 (Login + Home):** Initial engineering setup — no third-party deps, `URLSession`/`async-await` networking, Keychain storage, XCTest-based unit testing.
-- **Stage 2 (Detail Screen):** _Pending — will add the product-detail endpoint integration and any new testing needs once started._
+- **Stage 2 (Detail Screen):** Added `GET /products/{id}` endpoint integration via `ProductService.fetchProduct(id:)`, image loading via `AsyncImage`, same error handling pattern as Stage 1.
