@@ -8,7 +8,6 @@ import SwiftUI
 /// Main product catalog screen featuring navigation stack, pull-to-refresh, infinite scroll, and icon-only logout.
 struct HomeView: View {
     @State private var viewModel: HomeViewModel
-    @State private var selectedStubProduct: Product?
 
     init(onLogout: @escaping () -> Void) {
         _viewModel = State(initialValue: HomeViewModel(onLogout: onLogout))
@@ -35,13 +34,13 @@ struct HomeView: View {
                     logoutButton
                 }
             }
+            .navigationDestination(for: Product.self) { product in
+                DetailView(productID: product.id, initialProduct: product)
+            }
             .task {
                 if viewModel.products.isEmpty {
                     await viewModel.fetchInitialProducts()
                 }
-            }
-            .sheet(item: $selectedStubProduct) { product in
-                detailStubSheet(product: product)
             }
         }
     }
@@ -61,7 +60,7 @@ struct HomeView: View {
     private var productList: some View {
         List {
             ForEach(viewModel.products) { product in
-                Button(action: { selectedStubProduct = product }) {
+                NavigationLink(value: product) {
                     ProductRowView(product: product)
                 }
                 .buttonStyle(.plain)
@@ -92,90 +91,6 @@ struct HomeView: View {
         .refreshable {
             await viewModel.fetchInitialProducts()
         }
-    }
-
-    // MARK: - Stage 2 Detail Stub Sheet
-    private func detailStubSheet(product: Product) -> some View {
-        VStack(spacing: 16) {
-            Capsule()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 40, height: 5)
-                .padding(.top, 8)
-
-            Text("STAGE 2 DETAIL ROUTE STUB")
-                .font(.caption2)
-                .bold()
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Color.appPrimary.opacity(0.15))
-                .foregroundStyle(Color.appPrimary)
-                .clipShape(.rect(cornerRadius: 6))
-
-            AsyncImage(url: URL(string: product.thumbnail)) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(height: 160)
-                        .clipShape(.rect(cornerRadius: 12))
-                } else {
-                    Color(.secondarySystemBackground)
-                        .frame(height: 160)
-                        .clipShape(.rect(cornerRadius: 12))
-                }
-            }
-
-            Text(product.title)
-                .font(.title3)
-                .bold()
-                .foregroundStyle(.primary)
-
-            HStack {
-                Text(product.formattedPrice)
-                    .font(.title2)
-                    .bold()
-                    .foregroundStyle(Color.appPrimary)
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(Color.appWarning)
-                    Text(String(format: "%.2f", product.rating))
-                        .bold()
-                }
-                .font(.subheadline)
-            }
-            .padding(.horizontal)
-
-            Text(product.description)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal)
-
-            Text("ℹ️ Navigation target verified per FR-2.9 — Detail screen view implementation deferred to Stage 2.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.top, 8)
-
-            Spacer()
-
-            Button("Close Preview") {
-                selectedStubProduct = nil
-            }
-            .font(.headline)
-            .bold()
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(Color.appPrimary)
-            .clipShape(.rect(cornerRadius: 10))
-            .padding(.horizontal)
-            .padding(.bottom, 16)
-        }
-        .padding()
-        .presentationDetents([.medium, .large])
     }
 }
 
