@@ -2,20 +2,14 @@
 //  ContentView.swift
 //  Spec-Shopping
 //
-//  Created by Abhinav        on 07/08/26.
-//
 
 import SwiftUI
 
 struct ContentView: View {
+    @State private var sessionStore = SessionStore()
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        RootView(sessionStore: sessionStore)
     }
 }
 

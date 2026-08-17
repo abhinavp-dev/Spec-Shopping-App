@@ -121,6 +121,46 @@ All text respects Dynamic Type scaling — no `.fixedSize()` overrides on body c
 
 ---
 
+## 7. Screen: Detail (Product Details)
+
+### UI Flow
+1. User taps a product row on Home → Detail screen pushes onto NavigationStack.
+2. DetailView appears with loading indicator while product data is fetched from `/products/{id}`.
+3. Product data loads → detail content renders: image, title, rating, price, description.
+4. User scrolls to read full description if text is long.
+5. Back button (toolbar) pops Detail, returns to Home list with scroll position preserved.
+
+### Layout
+- Toolbar (top safe area): back button (labeled "Back" or arrow icon) + title (optional, can show product name or empty).
+- ScrollView for long content:
+  - Product image (full width, aspect ratio preserved, no cropping).
+  - Product title (`.title2`, bold, margin around).
+  - Product rating (star icon + numeric rating, `.callout`).
+  - Product price (`.title`, bold, teal accent if applicable, formatted currency).
+  - Divider (optional, subtle).
+  - Product description (`.body`, wrapped text, scrollable if long).
+  - Extra padding at bottom for safe area.
+
+### Validation / States
+- Loading: centered `ProgressView` while fetch is in-flight.
+- Success: all fields (image, title, rating, price, description) rendered.
+- Error (fetch failed): centered error icon + message ("Couldn't load product") + "Retry" button; tapping Retry re-attempts fetch.
+- Error (invalid/missing product): centered message ("Product not found") with back button to return to Home.
+- Image load failure: placeholder icon (e.g., 📦) shown instead of blank area.
+
+### Functional Interactions
+- Toolbar back button: taps pop DetailView, returns to HomeView (NavigationStack handles this).
+- Retry button (on error): re-attempts the `/products/{id}` fetch.
+- Scroll: description scrolls smoothly if it exceeds screen height; image stays fixed or scrolls with content (your preference — fixed is simpler).
+- Text selection: description text may be selectable (native SwiftUI behavior, no special handling).
+
+### Dark Mode
+- All text and backgrounds adapt to light/dark mode using semantic colors (same as Stage 1).
+- Image is displayed as-is (no inversion or filters).
+- Error/loading states use same colors as Home screen.
+
+---
+
 ## Changelog
 - **Stage 1 (Login + Home):** Design tokens, typography, theming, and full screen-level design specified as above.
-- **Stage 2 (Detail Screen):** _Pending — will define Detail screen layout, image gallery/hero treatment, and any new tokens once started._
+- **Stage 2 (Detail Screen):** Added Detail screen layout (image, title, rating, price, description), state transitions (loading, success, error), and interaction flows.

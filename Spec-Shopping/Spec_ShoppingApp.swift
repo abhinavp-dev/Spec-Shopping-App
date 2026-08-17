@@ -2,16 +2,16 @@
 //  Spec_ShoppingApp.swift
 //  Spec-Shopping
 //
-//  Created by Abhinav        on 07/08/26.
-//
 
 import SwiftUI
 
 @main
 struct Spec_ShoppingApp: App {
+    @State private var sessionStore = SessionStore()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView(sessionStore: sessionStore)
         }
     }
 }
