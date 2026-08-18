@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShopLite Prototype — Stage 1 (Login + Home)</title>
+  <title>ShopLite Prototype — Stage 1 & 2 (Login, Home & Detail Screen)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       /* Design Tokens per 04-DESIGN-DOCUMENT.md */
       --color-primary: #1D9E75;
+      --color-primary-dark: #107052;
       --color-primary-hover: #168562;
       --color-background: #FFFFFF;
       --color-surface: #F5F5F7;
@@ -19,6 +20,7 @@
       --color-text-secondary: #6E6E73;
       --color-error: #D93025;
       --color-error-bg: #FCE8E6;
+      --color-warning: #F5A623;
       --color-success: #188038;
       --color-border: #E5E5EA;
 
@@ -67,30 +69,31 @@
     /* Top Control Bar for Prototype Controls */
     .proto-controls {
       background: #ffffff;
-      padding: 12px 20px;
-      border-radius: 14px;
+      padding: 14px 20px;
+      border-radius: 16px;
       margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-      max-width: 800px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      max-width: 900px;
       width: 100%;
     }
 
     .proto-controls label {
       font-size: 13px;
-      font-weight: 600;
-      color: #555;
+      font-weight: 700;
+      color: #333;
+      margin-right: 4px;
     }
 
     .proto-btn {
       background: #F2F2F7;
       border: 1px solid #D1D1D6;
       color: #1C1C1E;
-      padding: 6px 12px;
+      padding: 7px 14px;
       border-radius: 8px;
       font-size: 12px;
       font-weight: 600;
@@ -164,10 +167,16 @@
       flex-direction: column;
       overflow: hidden;
       position: relative;
+      animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .screen-view.active {
       display: flex;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(12px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
     /* Header Nav Bar */
@@ -180,12 +189,37 @@
       border-bottom: 1px solid var(--color-border);
       flex-shrink: 0;
       background: var(--color-background);
+      z-index: 5;
     }
 
     .nav-bar h1 {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+
+    .nav-back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-primary);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: all 0.2s ease;
+    }
+
+    .nav-back-btn:hover {
+      background: var(--color-surface);
+      transform: scale(1.05);
     }
 
     .icon-btn {
@@ -245,7 +279,7 @@
     .brand-icon {
       width: 72px;
       height: 72px;
-      background: linear-gradient(135deg, var(--color-primary), #107052);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
       border-radius: 20px;
       display: inline-flex;
       align-items: center;
@@ -447,10 +481,144 @@
     .product-rating {
       font-size: 13px;
       font-weight: 600;
-      color: #F5A623;
+      color: var(--color-warning);
       display: flex;
       align-items: center;
       gap: 2px;
+    }
+
+    /* DETAIL SCREEN STYLES (STAGE 2) */
+    .detail-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .detail-img-wrapper {
+      width: 100%;
+      height: 260px;
+      border-radius: var(--radius-default);
+      background: var(--color-surface);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .detail-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .detail-header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: capitalize;
+    }
+
+    .pill-badge.category {
+      background: rgba(29, 158, 117, 0.12);
+      color: var(--color-primary);
+    }
+
+    .pill-badge.brand {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+    }
+
+    .detail-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      line-height: 1.3;
+    }
+
+    .detail-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .detail-rating {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .detail-stock {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .detail-stock.in-stock {
+      color: var(--color-success);
+    }
+
+    .detail-stock.out-of-stock {
+      color: var(--color-error);
+    }
+
+    .detail-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .detail-price {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--color-primary);
+    }
+
+    .discount-badge {
+      background: var(--color-error);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 4px 0;
+    }
+
+    .detail-desc-section h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 8px;
+    }
+
+    .detail-desc-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--color-text-secondary);
     }
 
     /* Loading / Error / Empty States */
@@ -525,50 +693,6 @@
       border-radius: 3px;
     }
 
-    /* Stage 2 Detail Stub Modal */
-    .modal-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      align-items: flex-end;
-      z-index: 100;
-      backdrop-filter: blur(4px);
-      animation: fadeIn 0.2s ease;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal-sheet {
-      background: var(--color-background);
-      width: 100%;
-      border-top-left-radius: 24px;
-      border-top-right-radius: 24px;
-      padding: var(--spacing-lg);
-      max-height: 80%;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
-    }
-
-    .stub-badge {
-      align-self: flex-start;
-      background: #E8F5E9;
-      color: var(--color-primary);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
     /* Pull to Refresh Indicator */
     .ptr-bar {
       height: 36px;
@@ -587,12 +711,14 @@
   <!-- PROTOTYPE SIMULATION CONTROLS -->
   <div class="proto-controls">
     <label>Prototype Controls:</label>
-    <button class="proto-btn" id="btn-toggle-theme">🌗 Toggle Theme</button>
+    <button class="proto-btn" id="btn-toggle-theme">🌗 Toggle Dark Mode</button>
     <button class="proto-btn" id="btn-toggle-frame">📱 Toggle Frame Size</button>
-    <button class="proto-btn" id="btn-sim-loading">⏳ Sim Loading State</button>
-    <button class="proto-btn" id="btn-sim-error">⚠️ Sim Initial Error</button>
-    <button class="proto-btn" id="btn-sim-empty">📭 Sim Empty State</button>
-    <button class="proto-btn" id="btn-reset">🔄 Reset Data</button>
+    <button class="proto-btn" id="btn-sim-loading">⏳ Sim Home Loading</button>
+    <button class="proto-btn" id="btn-sim-error">⚠️ Sim Home Error</button>
+    <button class="proto-btn" id="btn-sim-empty">📭 Sim Home Empty</button>
+    <button class="proto-btn" id="btn-sim-detail-err">⚠️ Sim Detail Error</button>
+    <button class="proto-btn" id="btn-sim-detail-404">❌ Sim Detail 404</button>
+    <button class="proto-btn" id="btn-reset">🔄 Reset</button>
   </div>
 
   <!-- DEVICE FRAME -->
@@ -711,21 +837,82 @@
       </div>
     </div>
 
-    <!-- STAGE 2 DETAIL STUB MODAL -->
-    <div class="modal-overlay" id="detail-modal" onclick="closeDetailModal(event)">
-      <div class="modal-sheet" onclick="event.stopPropagation()">
-        <div class="stub-badge">Stage 2 Detail Route Stub</div>
-        <img id="stub-img" src="" style="width:100%; height:180px; object-fit:cover; border-radius:12px; background:#eee;">
-        <h2 id="stub-title" style="font-size:20px; font-weight:700; color:var(--color-text-primary);"></h2>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span id="stub-price" style="font-size:22px; font-weight:800; color:var(--color-primary);"></span>
-          <span id="stub-rating" style="font-size:14px; font-weight:600; color:#F5A623;"></span>
+    <!-- 3. DETAIL SCREEN (STAGE 2 FEATURE) -->
+    <div class="screen-view" id="screen-detail">
+      <!-- Nav Bar with Back Button -->
+      <div class="nav-bar">
+        <button class="nav-back-btn" onclick="navigateToHome()" title="Back to Products" aria-label="Back to Products">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h1 id="detail-nav-title">Product Details</h1>
+        <div style="width:38px;"></div>
+      </div>
+
+      <!-- Detail Content Area -->
+      <div class="content-area" id="detail-content-area">
+        
+        <!-- DETAIL LOADING STATE -->
+        <div class="state-view" id="detail-state-loading" style="display:none;">
+          <div class="spinner dark" style="width:36px; height:36px; margin-bottom:16px;"></div>
+          <div class="state-title">Loading Details</div>
+          <div class="state-sub">Fetching product information...</div>
         </div>
-        <p id="stub-desc" style="font-size:14px; color:var(--color-text-secondary); line-height:1.4;"></p>
-        <p style="font-size:12px; color:#888; border-top:1px solid var(--color-border); padding-top:10px;">
-          ℹ️ FR-2.9 Navigation target verified — Detail view full implementation will occur in Stage 2.
-        </p>
-        <button class="proto-btn" style="background:var(--color-primary); color:white; padding:12px;" onclick="closeDetailModal()">Close Preview</button>
+
+        <!-- DETAIL ERROR STATE -->
+        <div class="state-view" id="detail-state-error" style="display:none;">
+          <div class="state-icon">⚠️</div>
+          <div class="state-title">Couldn't Load Product</div>
+          <div class="state-sub">Please check your connection and try again.</div>
+          <button class="proto-btn" style="background:var(--color-primary); color:white; padding:10px 20px;" onclick="retryDetailFetch()">Retry Request</button>
+        </div>
+
+        <!-- DETAIL 404 / NOT FOUND STATE -->
+        <div class="state-view" id="detail-state-404" style="display:none;">
+          <div class="state-icon">📦</div>
+          <div class="state-title">Product Not Found</div>
+          <div class="state-sub">The product you are looking for does not exist or has been removed.</div>
+          <button class="proto-btn" style="background:var(--color-primary); color:white; padding:10px 20px;" onclick="navigateToHome()">Back to Catalog</button>
+        </div>
+
+        <!-- PRODUCT DETAIL CONTENT -->
+        <div class="detail-container" id="detail-main-content">
+          <div class="detail-img-wrapper">
+            <img id="detail-img" class="detail-img" src="" alt="Product Image" onerror="this.src='https://via.placeholder.com/300x260?text=Image+Unavailable'">
+          </div>
+
+          <div class="detail-header">
+            <div class="badge-row">
+              <span class="pill-badge category" id="detail-category">Category</span>
+              <span class="pill-badge brand" id="detail-brand">Brand</span>
+            </div>
+            <h2 class="detail-title" id="detail-title">Product Title</h2>
+          </div>
+
+          <div class="detail-meta-row">
+            <div class="detail-rating">
+              <span style="color:var(--color-warning);">★</span>
+              <span id="detail-rating">4.50</span>
+            </div>
+            <div class="detail-stock in-stock" id="detail-stock">
+              <span>✓</span> <span id="detail-stock-text">In stock</span>
+            </div>
+          </div>
+
+          <div class="detail-price-row">
+            <span class="detail-price" id="detail-price">$0.00</span>
+            <span class="discount-badge" id="detail-discount" style="display:none;">15% OFF</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="detail-desc-section">
+            <h3>Description</h3>
+            <p class="detail-desc-text" id="detail-description">Full product description text goes here.</p>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -741,6 +928,7 @@
     let totalProducts = 0;
     let isLoading = false;
     let hasMore = true;
+    let currentProductID = null;
 
     // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
@@ -811,7 +999,6 @@
 
       if (!username || !password) return;
 
-      // In-flight state
       btn.disabled = true;
       btnText.style.display = 'none';
       spinner.style.display = 'block';
@@ -827,7 +1014,6 @@
         const data = await response.json();
 
         if (response.ok && data.accessToken) {
-          // Success: persist session
           localStorage.setItem('shoplite_token', data.accessToken);
           localStorage.setItem('shoplite_user', JSON.stringify({
             username: data.username,
@@ -836,14 +1022,10 @@
             email: data.email
           }));
 
-          // Clear password field
           document.getElementById('password').value = '';
-
-          // Transition to Home
           showScreen('screen-home');
           fetchProducts(true);
         } else {
-          // Failure (e.g. 401)
           errorMsg.textContent = data.message || 'Invalid username or password.';
           errorBanner.classList.add('show');
         }
@@ -942,7 +1124,7 @@
       newProducts.forEach(p => {
         const card = document.createElement('div');
         card.className = 'product-card';
-        card.onclick = () => openDetailModal(p);
+        card.onclick = () => navigateToDetail(p.id, p);
         card.innerHTML = `
           <img class="product-img" src="${p.thumbnail}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
           <div class="product-info">
@@ -965,23 +1147,108 @@
       }
     }
 
-    // --- STAGE 2 STUB MODAL ---
-    function openDetailModal(product) {
-      document.getElementById('stub-img').src = product.thumbnail;
-      document.getElementById('stub-title').textContent = product.title;
-      document.getElementById('stub-price').textContent = `$${product.price.toFixed(2)}`;
-      document.getElementById('stub-rating').textContent = `★ ${product.rating.toFixed(2)}`;
-      document.getElementById('stub-desc').textContent = product.description;
-      document.getElementById('detail-modal').classList.add('active');
+    // --- STAGE 2 DETAIL SCREEN NAVIGATION & DATA FETCH ---
+    async function navigateToDetail(productID, initialProduct = null) {
+      currentProductID = productID;
+      showScreen('screen-detail');
+
+      const stateLoading = document.getElementById('detail-state-loading');
+      const stateError = document.getElementById('detail-state-error');
+      const state404 = document.getElementById('detail-state-404');
+      const mainContent = document.getElementById('detail-main-content');
+
+      stateError.style.display = 'none';
+      state404.style.display = 'none';
+
+      // Pre-warm content if initialProduct provided from list
+      if (initialProduct) {
+        renderDetailContent(initialProduct);
+        stateLoading.style.display = 'none';
+        mainContent.style.display = 'flex';
+      } else {
+        stateLoading.style.display = 'flex';
+        mainContent.style.display = 'none';
+      }
+
+      // Fetch latest product detail from GET /products/{id}
+      try {
+        const response = await fetch(`https://dummyjson.com/products/${productID}`);
+        if (response.status === 404) {
+          stateLoading.style.display = 'none';
+          mainContent.style.display = 'none';
+          state404.style.display = 'flex';
+          return;
+        }
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+
+        const product = await response.json();
+        renderDetailContent(product);
+        stateLoading.style.display = 'none';
+        mainContent.style.display = 'flex';
+      } catch (err) {
+        if (!initialProduct) {
+          stateLoading.style.display = 'none';
+          mainContent.style.display = 'none';
+          stateError.style.display = 'flex';
+        }
+      }
     }
 
-    function closeDetailModal() {
-      document.getElementById('detail-modal').classList.remove('active');
+    function renderDetailContent(p) {
+      document.getElementById('detail-nav-title').textContent = p.title;
+      document.getElementById('detail-img').src = p.thumbnail;
+      document.getElementById('detail-title').textContent = p.title;
+      document.getElementById('detail-category').textContent = p.category;
+
+      const brandEl = document.getElementById('detail-brand');
+      if (p.brand) {
+        brandEl.textContent = p.brand;
+        brandEl.style.display = 'inline-block';
+      } else {
+        brandEl.style.display = 'none';
+      }
+
+      document.getElementById('detail-rating').textContent = p.rating.toFixed(2);
+      document.getElementById('detail-price').textContent = `$${p.price.toFixed(2)}`;
+
+      const discountEl = document.getElementById('detail-discount');
+      if (p.discountPercentage && p.discountPercentage > 0) {
+        discountEl.textContent = `${Math.round(p.discountPercentage)}% OFF`;
+        discountEl.style.display = 'inline-block';
+      } else {
+        discountEl.style.display = 'none';
+      }
+
+      const stockEl = document.getElementById('detail-stock');
+      const stockText = document.getElementById('detail-stock-text');
+      if (p.stock !== undefined && p.stock !== null) {
+        if (p.stock > 0) {
+          stockEl.className = 'detail-stock in-stock';
+          stockText.textContent = `${p.stock} in stock`;
+        } else {
+          stockEl.className = 'detail-stock out-of-stock';
+          stockText.textContent = 'Out of stock';
+        }
+      } else {
+        stockEl.style.display = 'none';
+      }
+
+      document.getElementById('detail-description').textContent = p.description;
+    }
+
+    function navigateToHome() {
+      showScreen('screen-home');
+    }
+
+    function retryDetailFetch() {
+      if (currentProductID) {
+        navigateToDetail(currentProductID);
+      }
     }
 
     // --- SIMULATION CONTROLS FOR PROTOTYPE REVIEWS ---
     document.getElementById('btn-sim-loading').addEventListener('click', () => {
-      if (!document.getElementById('screen-home').classList.contains('active')) return;
+      showScreen('screen-home');
       document.getElementById('product-list').innerHTML = '';
       document.getElementById('state-error').style.display = 'none';
       document.getElementById('state-empty').style.display = 'none';
@@ -989,7 +1256,7 @@
     });
 
     document.getElementById('btn-sim-error').addEventListener('click', () => {
-      if (!document.getElementById('screen-home').classList.contains('active')) return;
+      showScreen('screen-home');
       document.getElementById('product-list').innerHTML = '';
       document.getElementById('state-loading').style.display = 'none';
       document.getElementById('state-empty').style.display = 'none';
@@ -997,17 +1264,34 @@
     });
 
     document.getElementById('btn-sim-empty').addEventListener('click', () => {
-      if (!document.getElementById('screen-home').classList.contains('active')) return;
+      showScreen('screen-home');
       document.getElementById('product-list').innerHTML = '';
       document.getElementById('state-loading').style.display = 'none';
       document.getElementById('state-error').style.display = 'none';
       document.getElementById('state-empty').style.display = 'flex';
     });
 
+    document.getElementById('btn-sim-detail-err').addEventListener('click', () => {
+      showScreen('screen-detail');
+      document.getElementById('detail-main-content').style.display = 'none';
+      document.getElementById('detail-state-loading').style.display = 'none';
+      document.getElementById('detail-state-404').style.display = 'none';
+      document.getElementById('detail-state-error').style.display = 'flex';
+    });
+
+    document.getElementById('btn-sim-detail-404').addEventListener('click', () => {
+      showScreen('screen-detail');
+      document.getElementById('detail-main-content').style.display = 'none';
+      document.getElementById('detail-state-loading').style.display = 'none';
+      document.getElementById('detail-state-error').style.display = 'none';
+      document.getElementById('detail-state-404').style.display = 'flex';
+    });
+
     document.getElementById('btn-reset').addEventListener('click', () => {
-      if (document.getElementById('screen-home').classList.contains('active')) {
-        fetchProducts(true);
+      if (document.getElementById('screen-detail').classList.contains('active')) {
+        navigateToHome();
       }
+      fetchProducts(true);
     });
   </script>
 </body>

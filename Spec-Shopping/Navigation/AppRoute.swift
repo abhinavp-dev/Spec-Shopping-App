@@ -7,12 +7,12 @@ import Foundation
 
 /// Navigation destinations for NavigationStack.
 enum AppRoute: Hashable, Identifiable {
-    case detailStub(Product)
+    case detail(productID: Int)
 
     var id: String {
         switch self {
-        case .detailStub(let product):
-            return "detail_\(product.id)"
+        case .detail(let productID):
+            return "detail_\(productID)"
         }
     }
 }

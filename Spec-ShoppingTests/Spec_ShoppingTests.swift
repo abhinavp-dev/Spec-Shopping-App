@@ -31,6 +31,7 @@ final class MockAuthService: AuthServicing, @unchecked Sendable {
 
 final class MockProductService: ProductServicing, @unchecked Sendable {
     var shouldFail = false
+    var shouldReturnNotFound = false
     var mockProducts = [
         Product(id: 1, title: "Product 1", description: "Desc 1", category: "cat", price: 10.0, discountPercentage: nil, rating: 4.5, stock: 5, brand: "Brand A", thumbnail: "", images: nil),
         Product(id: 2, title: "Product 2", description: "Desc 2", category: "cat", price: 20.0, discountPercentage: nil, rating: 4.0, stock: 3, brand: "Brand B", thumbnail: "", images: nil)
@@ -41,6 +42,19 @@ final class MockProductService: ProductServicing, @unchecked Sendable {
             throw APIError.network("Network failure mock")
         }
         return ProductsResponse(products: mockProducts, total: 20, skip: skip, limit: limit)
+    }
+
+    func fetchProduct(id: Int) async throws -> Product {
+        if shouldFail {
+            throw APIError.network("Network failure mock")
+        }
+        if shouldReturnNotFound {
+            throw APIError.server(statusCode: 404)
+        }
+        if let product = mockProducts.first(where: { $0.id == id }) {
+            return product
+        }
+        throw APIError.server(statusCode: 404)
     }
 }
 
