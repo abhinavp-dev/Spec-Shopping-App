@@ -2,35 +2,166 @@
 //  Spec_ShoppingTests.swift
 //  Spec-ShoppingTests
 //
-//  Created by Abhinav        on 07/08/26.
-//
 
 import XCTest
 @testable import Spec_Shopping
 
+// MARK: - Mocks for Testing
+final class MockAuthService: AuthServicing, @unchecked Sendable {
+    var shouldFail = false
+    var mockResponse = AuthResponse(
+        id: 1,
+        username: "emilys",
+        email: "emilys@gmail.com",
+        firstName: "Emily",
+        lastName: "Smith",
+        gender: "female",
+        image: nil,
+        accessToken: "mock_access_token_123",
+        refreshToken: nil
+    )
+
+    func login(username: String, password: String) async throws -> AuthResponse {
+        if shouldFail {
+            throw APIError.unauthorized
+        }
+        return mockResponse
+    }
+}
+
+final class MockProductService: ProductServicing, @unchecked Sendable {
+    var shouldFail = false
+    var shouldReturnNotFound = false
+    var mockProducts = [
+        Product(id: 1, title: "Product 1", description: "Desc 1", category: "cat", price: 10.0, discountPercentage: nil, rating: 4.5, stock: 5, brand: "Brand A", thumbnail: "", images: nil),
+        Product(id: 2, title: "Product 2", description: "Desc 2", category: "cat", price: 20.0, discountPercentage: nil, rating: 4.0, stock: 3, brand: "Brand B", thumbnail: "", images: nil)
+    ]
+
+    func fetchProducts(limit: Int, skip: Int) async throws -> ProductsResponse {
+        if shouldFail {
+            throw APIError.network("Network failure mock")
+        }
+        return ProductsResponse(products: mockProducts, total: 20, skip: skip, limit: limit)
+    }
+
+    func fetchProduct(id: Int) async throws -> Product {
+        if shouldFail {
+            throw APIError.network("Network failure mock")
+        }
+        if shouldReturnNotFound {
+            throw APIError.server(statusCode: 404)
+        }
+        if let product = mockProducts.first(where: { $0.id == id }) {
+            return product
+        }
+        throw APIError.server(statusCode: 404)
+    }
+}
+
+final class MockAuthRepository: AuthRepositoryProtocol, @unchecked Sendable {
+    var sessionActive = false
+    var shouldFail = false
+
+    var hasActiveSession: Bool {
+        sessionActive
+    }
+
+    func login(username: String, password: String) async throws -> User {
+        if shouldFail {
+            throw APIError.unauthorized
+        }
+        sessionActive = true
+        return User(id: 1, username: username, email: "test@test.com", firstName: "Test", lastName: "User", gender: nil, image: nil)
+    }
+
+    func logout() throws {
+        sessionActive = false
+    }
+}
+
+// MARK: - ViewModel Unit Tests
 final class Spec_ShoppingTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    @MainActor
+    func testLoginValidationDisabledWhenEmpty() {
+        let mockRepo = MockAuthRepository()
+        let vm = LoginViewModel(authRepository: mockRepo, onLoginSuccess: {})
+
+        XCTAssertTrue(vm.isLoginButtonDisabled, "Login button should be disabled when fields are empty")
+
+        vm.username = "emilys"
+        XCTAssertTrue(vm.isLoginButtonDisabled, "Login button should be disabled when password is empty")
+
+        vm.password = "emilyspass"
+        XCTAssertFalse(vm.isLoginButtonDisabled, "Login button should be enabled when both fields are filled")
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+    @MainActor
+    func testLoginSuccessFlow() async {
+        let mockRepo = MockAuthRepository()
+        var successCalled = false
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+        let vm = LoginViewModel(authRepository: mockRepo) {
+            successCalled = true
         }
+
+        vm.username = "emilys"
+        vm.password = "emilyspass"
+
+        await vm.login()
+
+        XCTAssertTrue(successCalled, "onLoginSuccess callback should be called on successful login")
+        XCTAssertNil(vm.errorMessage, "errorMessage should be nil on success")
+        XCTAssertTrue(mockRepo.hasActiveSession, "Session should be active after login")
     }
 
+    @MainActor
+    func testLoginFailureFlow() async {
+        let mockRepo = MockAuthRepository()
+        mockRepo.shouldFail = true
+        var successCalled = false
+
+        let vm = LoginViewModel(authRepository: mockRepo) {
+            successCalled = true
+        }
+
+        vm.username = "wronguser"
+        vm.password = "wrongpass"
+
+        await vm.login()
+
+        XCTAssertFalse(successCalled, "onLoginSuccess callback should not be called on failure")
+        XCTAssertNotNil(vm.errorMessage, "errorMessage should be set on failure")
+        XCTAssertEqual(vm.errorMessage, "Invalid username or password.")
+        XCTAssertFalse(mockRepo.hasActiveSession, "Session should remain inactive")
+    }
+
+    @MainActor
+    func testHomeFetchInitialProductsSuccess() async {
+        let mockService = MockProductService()
+        let mockRepo = MockAuthRepository()
+        let vm = HomeViewModel(productService: mockService, authRepository: mockRepo, onLogout: {})
+
+        XCTAssertTrue(vm.products.isEmpty)
+
+        await vm.fetchInitialProducts()
+
+        XCTAssertEqual(vm.products.count, 2)
+        XCTAssertEqual(vm.products.first?.title, "Product 1")
+        XCTAssertNil(vm.errorMessage)
+        XCTAssertTrue(vm.hasMorePages)
+    }
+
+    @MainActor
+    func testHomeFetchInitialProductsFailure() async {
+        let mockService = MockProductService()
+        mockService.shouldFail = true
+        let mockRepo = MockAuthRepository()
+        let vm = HomeViewModel(productService: mockService, authRepository: mockRepo, onLogout: {})
+
+        await vm.fetchInitialProducts()
+
+        XCTAssertTrue(vm.products.isEmpty)
+        XCTAssertNotNil(vm.errorMessage)
+    }
 }
